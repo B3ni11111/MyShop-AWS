@@ -7,7 +7,7 @@ import { Typography, Button, CircularProgress } from "@mui/material";
 import BetterItem from "../components/ui/BetterItem";
 import type { itemsDataInterface } from "../types";
 import { API_ENDPOINTS } from "../config/api";
-import { fetchUserAttributes } from "aws-amplify/auth";
+import { getCurrentUser, fetchUserAttributes } from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
 
 export default function Home() {
@@ -22,25 +22,24 @@ export default function Home() {
       .finally(() => setLoading(false));
   }, []);
 
+  const loadUser = async () => {
+    try {
+      await getCurrentUser();
+      const attrs = await fetchUserAttributes();
+      console.log("fetchUserAttributes result:", attrs);
+      setUsername(attrs.name ?? attrs.email ?? "");
+    } catch {
+      setUsername("");
+    }
+  };
+
   useEffect(() => {
-    fetchUserAttributes()
-      .then((attrs) => {
-        console.log("fetchUserAttributes result:", attrs);
-        setUsername(attrs.name ?? attrs.email ?? "");
-      })
-      .catch(() => setUsername(""));
+    loadUser();
   }, []);
 
   useEffect(() => {
-    const unsubscribe = Hub.listen("auth", ({ payload }) => {
-      if (payload.event === "signInWithRedirect") {
-        fetchUserAttributes()
-          .then((attrs) => {
-            console.log("fetchUserAttributes result:", attrs);
-            setUsername(attrs.name ?? attrs.email ?? "");
-          })
-          .catch(() => setUsername(""));
-      }
+    const unsubscribe = Hub.listen("auth", () => {
+      loadUser();
     });
     return unsubscribe;
   }, []);
