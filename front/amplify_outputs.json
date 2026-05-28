@@ -5,6 +5,7 @@
     "user_pool_client_id": "4ccp5lcrifttlcp7omafu58icp",
     "identity_pool_id": "us-east-1:295a8c88-d7cc-43ee-9b2d-0b14ef9f1ee6",
     "mfa_methods": [],
+    
     "standard_required_attributes": [
       "email"
     ],
@@ -23,7 +24,14 @@
       "require_symbols": true,
       "require_uppercase": true
     },
-    "unauthenticated_identities_enabled": true
+    "unauthenticated_identities_enabled": true,
+    "oauth": {
+  "domain": "myshop-benny.auth.us-east-1.amazoncognito.com",
+  "scope": ["email", "openid", "profile"],
+  "redirectSignIn": ["http://localhost:3000/", "https://main.dspu5eyduw64.amplifyapp.com/"],
+  "redirectSignOut": ["http://localhost:3000/", "https://main.dspu5eyduw64.amplifyapp.com/"],
+  "responseType": "code"
+}
   },
   "data": {
     "url": "https://635nbthowjdtng6nwcngmu3wee.appsync-api.us-east-1.amazonaws.com/graphql",
