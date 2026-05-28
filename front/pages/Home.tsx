@@ -8,6 +8,7 @@ import BetterItem from "../components/ui/BetterItem";
 import type { itemsDataInterface } from "../types";
 import { API_ENDPOINTS } from "../config/api";
 import { fetchUserAttributes } from "aws-amplify/auth";
+import { Hub } from "aws-amplify/utils";
 
 export default function Home() {
   const [data, setData] = useState<itemsDataInterface[]>([]);
@@ -28,6 +29,20 @@ export default function Home() {
         setUsername(attrs.name ?? attrs.email ?? "");
       })
       .catch(() => setUsername(""));
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = Hub.listen("auth", ({ payload }) => {
+      if (payload.event === "signInWithRedirect") {
+        fetchUserAttributes()
+          .then((attrs) => {
+            console.log("fetchUserAttributes result:", attrs);
+            setUsername(attrs.name ?? attrs.email ?? "");
+          })
+          .catch(() => setUsername(""));
+      }
+    });
+    return unsubscribe;
   }, []);
 
   const allItems = data.flatMap((entry) =>
