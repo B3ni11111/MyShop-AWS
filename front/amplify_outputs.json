@@ -27,10 +27,11 @@
     "unauthenticated_identities_enabled": true,
     "oauth": {
   "domain": "myshop-benny.auth.us-east-1.amazoncognito.com",
-  "scope": ["email", "openid", "profile"],
-  "redirectSignIn": ["http://localhost:3000/", "https://main.dspu5eyduw64.amplifyapp.com/"],
-  "redirectSignOut": ["http://localhost:3000/", "https://main.dspu5eyduw64.amplifyapp.com/"],
-  "responseType": "code"
+  "scopes": ["email", "openid", "profile"],
+  "redirect_sign_in_uri": ["http://localhost:3000/", "https://main.dspu5eyduw64.amplifyapp.com/"],
+  "redirect_sign_out_uri": ["http://localhost:3000/", "https://main.dspu5eyduw64.amplifyapp.com/"],
+  "response_type": "code",
+  "identity_providers": ["Google"]
 }
   },
   "data": {
