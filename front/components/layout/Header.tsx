@@ -1,4 +1,4 @@
-import { useState, MouseEvent } from "react";
+import { useState, useEffect, MouseEvent } from "react";
 import AppBar from "@mui/material/AppBar";
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
@@ -13,6 +13,7 @@ import MenuItem from "@mui/material/MenuItem";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { Link } from "react-router-dom";
+import { signInWithRedirect, getCurrentUser } from "aws-amplify/auth";
 import logo from "../../assets/images/logo.jpg";
 
 interface HeaderProps {
@@ -22,6 +23,13 @@ interface HeaderProps {
 export default function Header({ cartCount = 0 }: HeaderProps) {
   const [anchorElNav, setAnchorElNav] = useState<HTMLElement | null>(null);
   const [anchorElUser, setAnchorElUser] = useState<HTMLElement | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+
+  useEffect(() => {
+    getCurrentUser()
+      .then(() => setIsLoggedIn(true))
+      .catch(() => setIsLoggedIn(false));
+  }, []);
 
   const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
@@ -145,8 +153,13 @@ export default function Header({ cartCount = 0 }: HeaderProps) {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
-              <Link to={"account/profile"}>
-                <MenuItem onClick={handleCloseUserMenu}>
+              {!isLoggedIn && (
+                <MenuItem
+                  onClick={() => {
+                    signInWithRedirect({ provider: "Google" });
+                    handleCloseUserMenu();
+                  }}
+                >
                   <Typography
                     sx={{
                       textAlign: "center",
@@ -155,52 +168,74 @@ export default function Header({ cartCount = 0 }: HeaderProps) {
                       color: "black",
                     }}
                   >
-                    Profile
+                    Login with Google
                   </Typography>
                 </MenuItem>
-              </Link>
-              <Link to={"account/orders"}>
-                <MenuItem onClick={handleCloseUserMenu}>
-                  <Typography
-                    sx={{
-                      textAlign: "center",
-                      pl: 2,
-                      textDecoration: "none",
-                      color: "black",
-                    }}
-                  >
-                    Your Orders
-                  </Typography>
-                </MenuItem>
-              </Link>
-              <Link to={"account/info"}>
-                <MenuItem onClick={handleCloseUserMenu}>
-                  <Typography
-                    sx={{
-                      textAlign: "center",
-                      pl: 2,
-                      textDecoration: "none",
-                      color: "black",
-                    }}
-                  >
-                    Account Center
-                  </Typography>
-                </MenuItem>
-              </Link>
-              <Link to={"account/settings"}>
-                <MenuItem onClick={handleCloseUserMenu}>
-                  <Typography
-                    sx={{
-                      textAlign: "center",
-                      pl: 2,
-                      textDecoration: "none",
-                      color: "black",
-                    }}
-                  >
-                    Settings & preferences
-                  </Typography>
-                </MenuItem>
-              </Link>
+              )}
+              {isLoggedIn && (
+                <Link to={"account/profile"}>
+                  <MenuItem onClick={handleCloseUserMenu}>
+                    <Typography
+                      sx={{
+                        textAlign: "center",
+                        pl: 2,
+                        textDecoration: "none",
+                        color: "black",
+                      }}
+                    >
+                      Profile
+                    </Typography>
+                  </MenuItem>
+                </Link>
+              )}
+              {isLoggedIn && (
+                <Link to={"account/orders"}>
+                  <MenuItem onClick={handleCloseUserMenu}>
+                    <Typography
+                      sx={{
+                        textAlign: "center",
+                        pl: 2,
+                        textDecoration: "none",
+                        color: "black",
+                      }}
+                    >
+                      Your Orders
+                    </Typography>
+                  </MenuItem>
+                </Link>
+              )}
+              {isLoggedIn && (
+                <Link to={"account/info"}>
+                  <MenuItem onClick={handleCloseUserMenu}>
+                    <Typography
+                      sx={{
+                        textAlign: "center",
+                        pl: 2,
+                        textDecoration: "none",
+                        color: "black",
+                      }}
+                    >
+                      Account Center
+                    </Typography>
+                  </MenuItem>
+                </Link>
+              )}
+              {isLoggedIn && (
+                <Link to={"account/settings"}>
+                  <MenuItem onClick={handleCloseUserMenu}>
+                    <Typography
+                      sx={{
+                        textAlign: "center",
+                        pl: 2,
+                        textDecoration: "none",
+                        color: "black",
+                      }}
+                    >
+                      Settings & preferences
+                    </Typography>
+                  </MenuItem>
+                </Link>
+              )}
             </Menu>
           </Box>
         </Toolbar>

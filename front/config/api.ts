@@ -3,7 +3,7 @@
 // TODO: Change back to production URL before deployment:
 // "https://myshop-server-0mz8.onrender.com"
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000";
+  import.meta.env.VITE_API_URL || "https://h8r39ws5vc.execute-api.us-east-1.amazonaws.com/prod";
 
 // API endpoints
 export const API_ENDPOINTS = {

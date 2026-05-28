@@ -12,6 +12,10 @@ import SubCat from "./pages/SubCat";
 import NotFound from "./pages/NotFound";
 import AllItems from "./pages/AllItems";
 import Home from "./pages/Home";
+import { Amplify } from 'aws-amplify';
+import outputs from './amplify_outputs.json';
+
+Amplify.configure(outputs);
 
 const router = createBrowserRouter([
   {

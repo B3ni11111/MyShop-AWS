@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\PC\\\\Desktop\\\\‏‏תיקיה חדשה\\\\MyShop-AWS\" -Recurse -Directory | Select-Object -First 20 | ForEach-Object { $_.FullName })",
+      "Read(//c/Users/PC/Desktop/My-Shop-Lambda/**)",
+      "Bash(rm -rf dist)",
+      "Bash(npm run *)",
+      "Bash(python *)",
+      "Bash(curl -s https://h8r39ws5vc.execute-api.us-east-1.amazonaws.com/prod/api/items/full)",
+      "Bash(aws apigateway *)",
+      "Bash(curl -s -w '\\\\nHTTP %{http_code}\\\\n' https://h8r39ws5vc.execute-api.us-east-1.amazonaws.com/prod/api/items/full)",
+      "Bash(curl -s -i https://h8r39ws5vc.execute-api.us-east-1.amazonaws.com/prod/api/items/full?cb=__TRACKED_VAR__)"
+    ]
+  }
+}
