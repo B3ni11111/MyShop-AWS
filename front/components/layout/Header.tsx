@@ -13,7 +13,7 @@ import MenuItem from "@mui/material/MenuItem";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { Link } from "react-router-dom";
-import { signInWithRedirect, getCurrentUser } from "aws-amplify/auth";
+import { signInWithRedirect, getCurrentUser, signOut } from "aws-amplify/auth";
 import logo from "../../assets/images/logo.jpg";
 
 interface HeaderProps {
@@ -235,6 +235,26 @@ export default function Header({ cartCount = 0 }: HeaderProps) {
                     </Typography>
                   </MenuItem>
                 </Link>
+              )}
+              {isLoggedIn && (
+                <MenuItem
+                  onClick={async () => {
+                    await signOut();
+                    setIsLoggedIn(false);
+                    handleCloseUserMenu();
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      textAlign: "center",
+                      pl: 2,
+                      textDecoration: "none",
+                      color: "black",
+                    }}
+                  >
+                    Sign Out
+                  </Typography>
+                </MenuItem>
               )}
             </Menu>
           </Box>
