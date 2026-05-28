@@ -7,7 +7,7 @@ import { Typography, Button, CircularProgress } from "@mui/material";
 import BetterItem from "../components/ui/BetterItem";
 import type { itemsDataInterface } from "../types";
 import { API_ENDPOINTS } from "../config/api";
-import { getCurrentUser, fetchUserAttributes } from "aws-amplify/auth";
+import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
 
 export default function Home() {
@@ -25,9 +25,10 @@ export default function Home() {
   const loadUser = async () => {
     try {
       await getCurrentUser();
-      const attrs = await fetchUserAttributes();
-      console.log("fetchUserAttributes result:", attrs);
-      setUsername(attrs.name ?? attrs.email ?? "");
+      const session = await fetchAuthSession();
+      const payload = session.tokens?.idToken?.payload;
+      const name = payload?.name ?? payload?.email ?? "";
+      setUsername(name as string);
     } catch {
       setUsername("");
     }
