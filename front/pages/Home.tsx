@@ -7,16 +7,24 @@ import { Typography, Button, CircularProgress } from "@mui/material";
 import BetterItem from "../components/ui/BetterItem";
 import type { itemsDataInterface } from "../types";
 import { API_ENDPOINTS } from "../config/api";
+import { fetchUserAttributes } from "aws-amplify/auth";
 
 export default function Home() {
   const [data, setData] = useState<itemsDataInterface[]>([]);
   const [loading, setLoading] = useState(true);
+  const [username, setUsername] = useState<string>("");
 
   useEffect(() => {
     fetch(API_ENDPOINTS.itemsFull)
       .then((res) => res.json())
       .then((data) => setData(data))
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    fetchUserAttributes()
+      .then((attrs) => setUsername(attrs.name ?? attrs.email ?? ""))
+      .catch(() => setUsername(""));
   }, []);
 
   const allItems = data.flatMap((entry) =>
@@ -49,7 +57,7 @@ export default function Home() {
       }}
     >
       <Typography variant="h4" sx={{ mb: 3 }}>
-        Welcome
+        {username ? `Welcome, ${username}!` : "Welcome"}
       </Typography>
 
       <Typography variant="h5" sx={{ mb: 2 }}>
