@@ -239,7 +239,7 @@ export default function Header({ cartCount = 0 }: HeaderProps) {
               {isLoggedIn && (
                 <MenuItem
                   onClick={async () => {
-                    await signOut();
+                    await signOut({ global: false });
                     setIsLoggedIn(false);
                     handleCloseUserMenu();
                   }}
