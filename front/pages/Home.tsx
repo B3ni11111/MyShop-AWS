@@ -23,7 +23,10 @@ export default function Home() {
 
   useEffect(() => {
     fetchUserAttributes()
-      .then((attrs) => setUsername(attrs.name ?? attrs.email ?? ""))
+      .then((attrs) => {
+        console.log("fetchUserAttributes result:", attrs);
+        setUsername(attrs.name ?? attrs.email ?? "");
+      })
       .catch(() => setUsername(""));
   }, []);
 
