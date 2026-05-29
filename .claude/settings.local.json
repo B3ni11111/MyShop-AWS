@@ -12,7 +12,9 @@
       "Bash(curl -s -i https://h8r39ws5vc.execute-api.us-east-1.amazonaws.com/prod/api/items/full?cb=__TRACKED_VAR__)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(npx tsc:*)",
+      "Bash(powershell -Command \"Get-Command sam -ErrorAction SilentlyContinue; pip show aws-sam-cli 2>&1; where.exe sam 2>&1\")"
     ]
   }
 }

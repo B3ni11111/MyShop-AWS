@@ -4,9 +4,10 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import type { oneItemInterface } from "../types";
 import { useParams, Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAppContext } from "../hooks/useAppContext";
 import { API_ENDPOINTS } from "../config/api";
+import { addToRecentlyViewed } from "../services/usersApi";
 import {
   Container,
   Box,
@@ -33,6 +34,8 @@ export default function ItemPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const hasTrackedView = useRef(false);
+
   useEffect(() => {
     if (!id) return;
 
@@ -48,6 +51,23 @@ export default function ItemPage() {
       })
       .catch(() => setError("Failed to fetch from server"))
       .finally(() => setLoading(false));
+  }, [id]);
+
+  // Track recently viewed
+  useEffect(() => {
+    if (!id || hasTrackedView.current) return;
+
+    const trackView = async () => {
+      try {
+        await addToRecentlyViewed(id);
+        hasTrackedView.current = true;
+      } catch (err) {
+        // Silently fail - user may not be authenticated
+        console.error("Failed to track recently viewed:", err);
+      }
+    };
+
+    trackView();
   }, [id]);
 
   if (loading) {

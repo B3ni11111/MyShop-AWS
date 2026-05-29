@@ -1,12 +1,67 @@
-import { Box, Card, Typography, IconButton } from "@mui/material";
+import { useState, useEffect } from "react";
+import { Box, Card, Typography, IconButton, CircularProgress } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import { useAppContext } from "../hooks/useAppContext";
+import { getFavorites, removeFavorite } from "../services/usersApi";
+import type { oneItemInterface } from "../types";
+import { itemsData as staticItemsData } from "../data/itemsData";
+
+const flattenedItems: oneItemInterface[] = staticItemsData.flatMap((entry) =>
+  entry.category.subCategory.flatMap((sub) => sub.items)
+);
 
 export default function Fav() {
     const { fav, toggleFav, addToCart } = useAppContext();
+    const [loading, setLoading] = useState(true);
+    const [apiFavorites, setApiFavorites] = useState<oneItemInterface[]>([]);
 
-    if (fav.length === 0) {
+    useEffect(() => {
+        const loadFavorites = async () => {
+            try {
+                const { favorites } = await getFavorites();
+                const favItems = favorites
+                    .map((productId) => flattenedItems.find((p) => String(p.id) === productId))
+                    .filter((item): item is oneItemInterface => item !== undefined);
+                setApiFavorites(favItems);
+            } catch (err) {
+                // User not authenticated, use context favorites
+                console.error("Failed to load favorites from API:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadFavorites();
+    }, []);
+
+    const handleRemoveFavorite = async (item: oneItemInterface) => {
+        // Update local state via context
+        toggleFav(item);
+
+        // Also update local API favorites state
+        setApiFavorites((prev) => prev.filter((f) => f.id !== item.id));
+
+        // API call is handled by toggleFav in context
+        try {
+            await removeFavorite(String(item.id));
+        } catch (err) {
+            console.error("Failed to remove favorite from API:", err);
+        }
+    };
+
+    // Use API favorites if available, otherwise use context
+    const displayFavorites = apiFavorites.length > 0 ? apiFavorites : fav;
+
+    if (loading) {
+        return (
+            <Box sx={{ bgcolor: "background.paper", p: 3, borderRadius: 2, textAlign: "center" }}>
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (displayFavorites.length === 0) {
         return (
             <Box sx={{ bgcolor: "background.paper", p: 3, borderRadius: 2 }}>
                 <Typography variant="h4">No Favorites Yet</Typography>
@@ -20,7 +75,7 @@ export default function Fav() {
                 Favorites
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {fav.map((item) => (
+                {displayFavorites.map((item) => (
                     <Card
                         key={item.id}
                         sx={{
@@ -59,7 +114,7 @@ export default function Fav() {
                                 <AddShoppingCartIcon />
                             </IconButton>
                             <IconButton
-                                onClick={() => toggleFav(item)}
+                                onClick={() => handleRemoveFavorite(item)}
                                 sx={{ color: "error.main" }}
                             >
                                 <DeleteIcon />

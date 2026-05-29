@@ -1,0 +1,13 @@
+{
+  "name": "myshop-users-service",
+  "version": "1.0.0",
+  "description": "MyShop Users Microservice - Cart, Favorites, Recently Viewed",
+  "main": "handlers/cart.js",
+  "scripts": {
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.600.0",
+    "@aws-sdk/lib-dynamodb": "^3.600.0"
+  }
+}

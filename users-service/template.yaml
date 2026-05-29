@@ -1,0 +1,274 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: MyShop Users Microservice - Cart, Favorites, Recently Viewed
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - staging
+      - prod
+  CognitoUserPoolId:
+    Type: String
+    Default: us-east-1_ey3CjpMLF
+  DynamoDBTableName:
+    Type: String
+    Default: myshop-users
+
+Globals:
+  Function:
+    Runtime: nodejs20.x
+    Timeout: 10
+    MemorySize: 256
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref DynamoDBTableName
+    Architectures:
+      - arm64
+
+Resources:
+  # API Gateway
+  UsersApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub myshop-users-api-${Environment}
+      StageName: !Ref Environment
+      Cors:
+        AllowMethods: "'GET,POST,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,Authorization'"
+        AllowOrigin: "'*'"
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            UserPoolArn: !Sub arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${CognitoUserPoolId}
+
+  # CORS Preflight Handler
+  CorsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/handlers/cors.handler
+      Runtime: nodejs20.x
+      Events:
+        OptionsCart:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/cart
+            Method: OPTIONS
+            Auth:
+              Authorizer: NONE
+        OptionsCartItem:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/cart/{productId}
+            Method: OPTIONS
+            Auth:
+              Authorizer: NONE
+        OptionsFavorites:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/favorites
+            Method: OPTIONS
+            Auth:
+              Authorizer: NONE
+        OptionsFavoritesItem:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/favorites/{productId}
+            Method: OPTIONS
+            Auth:
+              Authorizer: NONE
+        OptionsRecentlyViewed:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/recently-viewed
+            Method: OPTIONS
+            Auth:
+              Authorizer: NONE
+
+  # Gateway Response for CORS on 4XX errors
+  GatewayResponseDefault4XX:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseType: DEFAULT_4XX
+      RestApiId: !Ref UsersApi
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,Authorization'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,DELETE,OPTIONS'"
+
+  # IAM Role for Lambda functions
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub myshop-users-lambda-role-${Environment}
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:DeleteItem
+                Resource: !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DynamoDBTableName}
+        - PolicyName: CloudWatchLogs
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*
+
+  # ==================== CART FUNCTIONS ====================
+
+  GetCartFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub myshop-get-cart-${Environment}
+      Handler: handlers/cart.getCart
+      CodeUri: src/
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        GetCart:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/cart
+            Method: GET
+
+  AddToCartFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub myshop-add-to-cart-${Environment}
+      Handler: handlers/cart.addToCart
+      CodeUri: src/
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        AddToCart:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/cart
+            Method: POST
+
+  RemoveFromCartFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub myshop-remove-from-cart-${Environment}
+      Handler: handlers/cart.removeFromCart
+      CodeUri: src/
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        RemoveFromCart:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/cart/{productId}
+            Method: DELETE
+
+  # ==================== FAVORITES FUNCTIONS ====================
+
+  GetFavoritesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub myshop-get-favorites-${Environment}
+      Handler: handlers/favorites.getFavorites
+      CodeUri: src/
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        GetFavorites:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/favorites
+            Method: GET
+
+  AddFavoriteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub myshop-add-favorite-${Environment}
+      Handler: handlers/favorites.addFavorite
+      CodeUri: src/
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        AddFavorite:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/favorites
+            Method: POST
+
+  RemoveFavoriteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub myshop-remove-favorite-${Environment}
+      Handler: handlers/favorites.removeFavorite
+      CodeUri: src/
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        RemoveFavorite:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/favorites/{productId}
+            Method: DELETE
+
+  # ==================== RECENTLY VIEWED FUNCTIONS ====================
+
+  GetRecentlyViewedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub myshop-get-recently-viewed-${Environment}
+      Handler: handlers/recently-viewed.getRecentlyViewed
+      CodeUri: src/
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        GetRecentlyViewed:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/recently-viewed
+            Method: GET
+
+  AddRecentlyViewedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub myshop-add-recently-viewed-${Environment}
+      Handler: handlers/recently-viewed.addRecentlyViewed
+      CodeUri: src/
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Events:
+        AddRecentlyViewed:
+          Type: Api
+          Properties:
+            RestApiId: !Ref UsersApi
+            Path: /users/{userId}/recently-viewed
+            Method: POST
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub https://${UsersApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}
+  ApiId:
+    Description: API Gateway ID
+    Value: !Ref UsersApi

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useCallback } from "react";
 import "./styles/App.css";
 import "./assets/fonts/fonts.css";
 import { ThemeProvider } from "@emotion/react";
@@ -10,6 +10,15 @@ import Footer from "./components/layout/Footer";
 import { AppContext } from "./context/AppContext";
 import type { AppContextType, oneItemInterface, CartItem, SortOption } from "./types";
 import { itemsData as staticItemsData } from "./data/itemsData";
+import { getCurrentUser } from "aws-amplify/auth";
+import {
+  getCart as apiGetCart,
+  addToCart as apiAddToCart,
+  removeFromCart as apiRemoveFromCart,
+  getFavorites as apiFavorites,
+  addToFavorite as apiAddFavorite,
+  removeFavorite as apiRemoveFavorite,
+} from "./services/usersApi";
 
 const flattenedItems: oneItemInterface[] = staticItemsData.flatMap((entry) =>
   entry.category.subCategory.flatMap((sub) => sub.items)
@@ -25,8 +34,61 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [sort, setSort] = useState<SortOption>("recommended");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const addToCart = (item: oneItemInterface) => {
+  // Check auth status and load data from API
+  useEffect(() => {
+    const checkAuthAndLoadData = async () => {
+      try {
+        await getCurrentUser();
+        setIsAuthenticated(true);
+
+        // Load cart from API
+        try {
+          const { cart: apiCart } = await apiGetCart();
+          if (apiCart.length > 0) {
+            const cartItems: CartItem[] = apiCart.map((item) => {
+              const product = flattenedItems.find((p) => String(p.id) === item.productId);
+              return {
+                id: item.productId,
+                product: product?.product || "Unknown",
+                price: item.price,
+                img: product?.img || "",
+                info: product?.info || "",
+                quantity: item.qty,
+              };
+            });
+            setCart(cartItems);
+          }
+        } catch (err) {
+          console.error("Failed to load cart from API:", err);
+        }
+
+        // Load favorites from API
+        try {
+          const { favorites } = await apiFavorites();
+          if (favorites.length > 0) {
+            const favItems: oneItemInterface[] = favorites
+              .map((productId) => flattenedItems.find((p) => String(p.id) === productId))
+              .filter((item): item is oneItemInterface => item !== undefined);
+            setFav(favItems);
+          }
+        } catch (err) {
+          console.error("Failed to load favorites from API:", err);
+        }
+      } catch {
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuthAndLoadData();
+  }, []);
+
+  const addToCart = useCallback(async (item: oneItemInterface) => {
+    const existingItem = cart.find((cartItem) => cartItem.id === item.id);
+    const newQty = existingItem ? existingItem.quantity + 1 : 1;
+
+    // Update local state immediately
     setCart((prevCart) => {
       const isExist = prevCart.find((cartItem) => cartItem.id === item.id);
       if (isExist) {
@@ -38,37 +100,94 @@ function App() {
       }
       return [...prevCart, { ...item, quantity: 1 }];
     });
-    console.log(cart);
-  };
-  const toggleFav = (item: oneItemInterface) => {
+
+    // Sync with API if authenticated
+    if (isAuthenticated) {
+      try {
+        await apiAddToCart(String(item.id), newQty, item.price);
+      } catch (err) {
+        console.error("Failed to sync cart with API:", err);
+      }
+    }
+  }, [cart, isAuthenticated]);
+
+  const toggleFav = useCallback(async (item: oneItemInterface) => {
+    const isFav = fav.find((favItem) => favItem.id === item.id);
+
+    // Update local state immediately
     setFav((prevArr) => {
-      const isFav = prevArr.find((favItem) => favItem.id === item.id);
       if (isFav) {
         return prevArr.filter((favItem) => favItem.id !== item.id);
       }
       return [...prevArr, item];
     });
-  };
 
-  const removeFromCart = (itemId: number | string) => {
+    // Sync with API if authenticated
+    if (isAuthenticated) {
+      try {
+        if (isFav) {
+          await apiRemoveFavorite(String(item.id));
+        } else {
+          await apiAddFavorite(String(item.id));
+        }
+      } catch (err) {
+        console.error("Failed to sync favorites with API:", err);
+      }
+    }
+  }, [fav, isAuthenticated]);
+
+  const removeFromCart = useCallback(async (itemId: number | string) => {
+    // Update local state immediately
     setCart((prevCart) => prevCart.filter((item) => item.id !== itemId));
-    console.log(cart);
-  };
-  const resetCart = () => {
-    setCart([]);
-  };
 
-  const updateQuantity = (id: number | string, newQ: number) => {
+    // Sync with API if authenticated
+    if (isAuthenticated) {
+      try {
+        await apiRemoveFromCart(String(itemId));
+      } catch (err) {
+        console.error("Failed to sync cart removal with API:", err);
+      }
+    }
+  }, [isAuthenticated]);
+
+  const resetCart = useCallback(async () => {
+    const currentCart = cart;
+    setCart([]);
+
+    // Remove all items from API if authenticated
+    if (isAuthenticated) {
+      try {
+        await Promise.all(currentCart.map((item) => apiRemoveFromCart(String(item.id))));
+      } catch (err) {
+        console.error("Failed to reset cart in API:", err);
+      }
+    }
+  }, [cart, isAuthenticated]);
+
+  const updateQuantity = useCallback(async (id: number | string, newQ: number) => {
     if (newQ <= 0) {
       removeFromCart(id);
       return;
     }
+
+    const item = cart.find((i) => i.id === id);
+
+    // Update local state immediately
     setCart((prevCart) =>
       prevCart.map((item) =>
         item.id === id ? { ...item, quantity: newQ } : item,
       ),
     );
-  };
+
+    // Sync with API if authenticated
+    if (isAuthenticated && item) {
+      try {
+        await apiAddToCart(String(id), newQ, item.price);
+      } catch (err) {
+        console.error("Failed to sync quantity with API:", err);
+      }
+    }
+  }, [cart, isAuthenticated, removeFromCart]);
 
   const getTotalItems = () => {
     return cart.reduce((total, item) => total + item.quantity, 0);
