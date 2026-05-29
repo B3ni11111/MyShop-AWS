@@ -27,7 +27,7 @@ interface ItemWithContext extends oneItemInterface {
 }
 
 export default function ItemPage() {
-  const { addToCart, toggleFav, fav } = useAppContext();
+  const { addToCart, toggleFav, fav, isAuthenticated } = useAppContext();
   const { id } = useParams<{ id: string }>();
 
   const [item, setItem] = useState<ItemWithContext | null>(null);
@@ -53,22 +53,21 @@ export default function ItemPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Track recently viewed
+  // Track recently viewed (only if authenticated)
   useEffect(() => {
-    if (!id || hasTrackedView.current) return;
+    if (!id || !isAuthenticated || hasTrackedView.current) return;
 
     const trackView = async () => {
       try {
         await addToRecentlyViewed(id);
         hasTrackedView.current = true;
       } catch (err) {
-        // Silently fail - user may not be authenticated
         console.error("Failed to track recently viewed:", err);
       }
     };
 
     trackView();
-  }, [id]);
+  }, [id, isAuthenticated]);
 
   if (loading) {
     return (

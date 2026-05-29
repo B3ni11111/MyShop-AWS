@@ -46,6 +46,7 @@ export interface AppContextType {
   cart: CartItem[];
   sort: SortOption;
   itemsData: oneItemInterface[];
+  isAuthenticated: boolean;
   resetCart: () => void;
   getTotalItems: () => number;
   addToCart: (item: oneItemInterface) => void;
@@ -53,4 +54,5 @@ export interface AppContextType {
   setSort: (sort: SortOption) => void;
   removeFromCart: (itemId: number | string) => void;
   updateQuantity: (id: number | string, newQ: number) => void;
+  showAuthMessage: (message: string) => void;
 }

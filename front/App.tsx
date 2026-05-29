@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useCallback } from "react";
 import "./styles/App.css";
 import "./assets/fonts/fonts.css";
 import { ThemeProvider } from "@emotion/react";
-import { Box, CssBaseline } from "@mui/material";
+import { Box, CssBaseline, Snackbar, Alert } from "@mui/material";
 import theme from "./config/theme";
 import { Outlet } from "react-router-dom";
 import Header from "./components/layout/Header";
@@ -35,6 +35,11 @@ function App() {
   });
   const [sort, setSort] = useState<SortOption>("recommended");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authMessage, setAuthMessage] = useState<string | null>(null);
+
+  const showAuthMessage = useCallback((message: string) => {
+    setAuthMessage(message);
+  }, []);
 
   // Check auth status and load data from API
   useEffect(() => {
@@ -47,17 +52,20 @@ function App() {
         try {
           const { cart: apiCart } = await apiGetCart();
           if (apiCart.length > 0) {
-            const cartItems: CartItem[] = apiCart.map((item) => {
-              const product = flattenedItems.find((p) => String(p.id) === item.productId);
-              return {
-                id: item.productId,
-                product: product?.product || "Unknown",
-                price: item.price,
-                img: product?.img || "",
-                info: product?.info || "",
-                quantity: item.qty,
-              };
-            });
+            const cartItems: CartItem[] = apiCart
+              .map((item) => {
+                const product = flattenedItems.find((p) => String(p.id) === item.productId);
+                if (!product) return null; // Filter out items with no matching product
+                return {
+                  id: item.productId,
+                  product: product.product,
+                  price: item.price,
+                  img: product.img,
+                  info: product.info,
+                  quantity: item.qty,
+                };
+              })
+              .filter((item): item is CartItem => item !== null);
             setCart(cartItems);
           }
         } catch (err) {
@@ -85,6 +93,11 @@ function App() {
   }, []);
 
   const addToCart = useCallback(async (item: oneItemInterface) => {
+    if (!isAuthenticated) {
+      showAuthMessage("Please sign in to add items to cart");
+      return;
+    }
+
     const existingItem = cart.find((cartItem) => cartItem.id === item.id);
     const newQty = existingItem ? existingItem.quantity + 1 : 1;
 
@@ -101,17 +114,20 @@ function App() {
       return [...prevCart, { ...item, quantity: 1 }];
     });
 
-    // Sync with API if authenticated
-    if (isAuthenticated) {
-      try {
-        await apiAddToCart(String(item.id), newQty, item.price);
-      } catch (err) {
-        console.error("Failed to sync cart with API:", err);
-      }
+    // Sync with API
+    try {
+      await apiAddToCart(String(item.id), newQty, item.price);
+    } catch (err) {
+      console.error("Failed to sync cart with API:", err);
     }
-  }, [cart, isAuthenticated]);
+  }, [cart, isAuthenticated, showAuthMessage]);
 
   const toggleFav = useCallback(async (item: oneItemInterface) => {
+    if (!isAuthenticated) {
+      showAuthMessage("Please sign in to add items to favorites");
+      return;
+    }
+
     const isFav = fav.find((favItem) => favItem.id === item.id);
 
     // Update local state immediately
@@ -122,19 +138,17 @@ function App() {
       return [...prevArr, item];
     });
 
-    // Sync with API if authenticated
-    if (isAuthenticated) {
-      try {
-        if (isFav) {
-          await apiRemoveFavorite(String(item.id));
-        } else {
-          await apiAddFavorite(String(item.id));
-        }
-      } catch (err) {
-        console.error("Failed to sync favorites with API:", err);
+    // Sync with API
+    try {
+      if (isFav) {
+        await apiRemoveFavorite(String(item.id));
+      } else {
+        await apiAddFavorite(String(item.id));
       }
+    } catch (err) {
+      console.error("Failed to sync favorites with API:", err);
     }
-  }, [fav, isAuthenticated]);
+  }, [fav, isAuthenticated, showAuthMessage]);
 
   const removeFromCart = useCallback(async (itemId: number | string) => {
     // Update local state immediately
@@ -223,12 +237,14 @@ function App() {
     setSort,
     cart,
     fav,
+    isAuthenticated,
     addToCart,
     toggleFav,
     removeFromCart,
     updateQuantity,
     getTotalItems,
     resetCart,
+    showAuthMessage,
   };
 
   return (
@@ -250,6 +266,21 @@ function App() {
 
           <Footer />
         </Box>
+        <Snackbar
+          open={!!authMessage}
+          autoHideDuration={4000}
+          onClose={() => setAuthMessage(null)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert
+            onClose={() => setAuthMessage(null)}
+            severity="warning"
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {authMessage}
+          </Alert>
+        </Snackbar>
       </ThemeProvider>
     </AppContext.Provider>
   );
