@@ -57,7 +57,7 @@ function App() {
                 const product = flattenedItems.find((p) => String(p.id) === item.productId);
                 if (!product) return null; // Filter out items with no matching product
                 return {
-                  id: item.productId,
+                  id: String(item.productId),
                   product: product.product,
                   price: item.price,
                   img: product.img,
