@@ -14,7 +14,9 @@
       "Bash(git commit *)",
       "Bash(git push *)",
       "Bash(npx tsc:*)",
-      "Bash(powershell -Command \"Get-Command sam -ErrorAction SilentlyContinue; pip show aws-sam-cli 2>&1; where.exe sam 2>&1\")"
+      "Bash(powershell -Command \"Get-Command sam -ErrorAction SilentlyContinue; pip show aws-sam-cli 2>&1; where.exe sam 2>&1\")",
+      "Bash(git commit:*)",
+      "Bash(git push)"
     ]
   }
 }

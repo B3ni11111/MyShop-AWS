@@ -52,20 +52,20 @@ function App() {
         try {
           const { cart: apiCart } = await apiGetCart();
           if (apiCart.length > 0) {
-            const cartItems: CartItem[] = apiCart
-              .map((item) => {
-                const product = flattenedItems.find((p) => String(p.id) === item.productId);
-                if (!product) return null; // Filter out items with no matching product
-                return {
-                  id: String(item.productId),
+            const cartItems: CartItem[] = [];
+            for (const item of apiCart) {
+              const product = flattenedItems.find((p) => String(p.id) === item.productId);
+              if (product) {
+                cartItems.push({
+                  id: item.productId,
                   product: product.product,
                   price: item.price,
                   img: product.img,
                   info: product.info,
                   quantity: item.qty,
-                };
-              })
-              .filter((item): item is CartItem => item !== null);
+                });
+              }
+            }
             setCart(cartItems);
           }
         } catch (err) {
