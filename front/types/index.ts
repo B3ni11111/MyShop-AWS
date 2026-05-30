@@ -55,4 +55,5 @@ export interface AppContextType {
   removeFromCart: (itemId: number | string) => void;
   updateQuantity: (id: number | string, newQ: number) => void;
   showAuthMessage: (message: string) => void;
+  clearUserData: () => void;
 }

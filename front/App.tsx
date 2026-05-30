@@ -178,6 +178,12 @@ function App() {
     }
   }, [cart, isAuthenticated]);
 
+  const clearUserData = useCallback(() => {
+    setCart([]);
+    setFav([]);
+    setIsAuthenticated(false);
+  }, []);
+
   const updateQuantity = useCallback(async (id: number | string, newQ: number) => {
     if (newQ <= 0) {
       removeFromCart(id);
@@ -245,6 +251,7 @@ function App() {
     getTotalItems,
     resetCart,
     showAuthMessage,
+    clearUserData,
   };
 
   return (

@@ -33,7 +33,7 @@ export default function Header({ cartCount = 0 }: HeaderProps) {
   const [anchorElCart, setAnchorElCart] = useState<HTMLElement | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-  const { cart, updateQuantity, removeFromCart } = useAppContext();
+  const { cart, updateQuantity, removeFromCart, clearUserData } = useAppContext();
 
   useEffect(() => {
     getCurrentUser()
@@ -419,6 +419,7 @@ export default function Header({ cartCount = 0 }: HeaderProps) {
                 <MenuItem
                   onClick={async () => {
                     await signOut({ global: false });
+                    clearUserData();
                     setIsLoggedIn(false);
                     handleCloseUserMenu();
                   }}
