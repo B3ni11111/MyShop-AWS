@@ -15,7 +15,23 @@ import Home from "./pages/Home";
 import { Amplify } from 'aws-amplify';
 import outputs from './amplify_outputs.json';
 
-Amplify.configure(outputs);
+// OAuth redirects must match the origin the app is actually served from
+// (CloudFront, Amplify Hosting, or localhost). Pin them to the current origin
+// at runtime so Amplify always selects a matching redirect URI regardless of
+// which domain serves the app. All these origins are registered as allowed
+// callback/sign-out URLs on the Cognito app client.
+const currentOrigin = `${window.location.origin}/`;
+Amplify.configure({
+  ...outputs,
+  auth: {
+    ...outputs.auth,
+    oauth: {
+      ...outputs.auth.oauth,
+      redirect_sign_in_uri: [currentOrigin],
+      redirect_sign_out_uri: [currentOrigin],
+    },
+  },
+} as typeof outputs);
 
 const router = createBrowserRouter([
   {
