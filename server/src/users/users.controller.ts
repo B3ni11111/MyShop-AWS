@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CognitoAuthGuard } from './auth/cognito-auth.guard';
+import { AuthEmail } from './auth/auth-user.decorator';
 import { UsersService } from './users.service';
 
 interface AddToCartDto {
@@ -29,13 +30,17 @@ export class UsersController {
   // ==================== CART ====================
 
   @Get('cart')
-  async getCart(@Param('userId') userId: string) {
-    const cart = await this.usersService.getCart(userId);
+  async getCart(@Param('userId') userId: string, @AuthEmail() email: string) {
+    const cart = await this.usersService.getCart(userId, email);
     return { cart };
   }
 
   @Post('cart')
-  async addToCart(@Param('userId') userId: string, @Body() body: AddToCartDto) {
+  async addToCart(
+    @Param('userId') userId: string,
+    @AuthEmail() email: string,
+    @Body() body: AddToCartDto,
+  ) {
     const { productId, qty, price } = body;
 
     if (!productId || qty === undefined || price === undefined) {
@@ -52,6 +57,7 @@ export class UsersController {
 
     const cart = await this.usersService.addToCart(
       userId,
+      email,
       productId,
       qty,
       price,
@@ -62,23 +68,32 @@ export class UsersController {
   @Delete('cart/:productId')
   async removeFromCart(
     @Param('userId') userId: string,
+    @AuthEmail() email: string,
     @Param('productId') productId: string,
   ) {
-    const cart = await this.usersService.removeFromCart(userId, productId);
+    const cart = await this.usersService.removeFromCart(
+      userId,
+      email,
+      productId,
+    );
     return { cart };
   }
 
   // ==================== FAVORITES ====================
 
   @Get('favorites')
-  async getFavorites(@Param('userId') userId: string) {
-    const favorites = await this.usersService.getFavorites(userId);
+  async getFavorites(
+    @Param('userId') userId: string,
+    @AuthEmail() email: string,
+  ) {
+    const favorites = await this.usersService.getFavorites(userId, email);
     return { favorites };
   }
 
   @Post('favorites')
   async addFavorite(
     @Param('userId') userId: string,
+    @AuthEmail() email: string,
     @Body() body: ProductIdDto,
   ) {
     if (!body.productId) {
@@ -86,6 +101,7 @@ export class UsersController {
     }
     const favorites = await this.usersService.addFavorite(
       userId,
+      email,
       body.productId,
     );
     return { favorites };
@@ -94,23 +110,35 @@ export class UsersController {
   @Delete('favorites/:productId')
   async removeFavorite(
     @Param('userId') userId: string,
+    @AuthEmail() email: string,
     @Param('productId') productId: string,
   ) {
-    const favorites = await this.usersService.removeFavorite(userId, productId);
+    const favorites = await this.usersService.removeFavorite(
+      userId,
+      email,
+      productId,
+    );
     return { favorites };
   }
 
   // ==================== RECENTLY VIEWED ====================
 
   @Get('recently-viewed')
-  async getRecentlyViewed(@Param('userId') userId: string) {
-    const recentlyViewed = await this.usersService.getRecentlyViewed(userId);
+  async getRecentlyViewed(
+    @Param('userId') userId: string,
+    @AuthEmail() email: string,
+  ) {
+    const recentlyViewed = await this.usersService.getRecentlyViewed(
+      userId,
+      email,
+    );
     return { recentlyViewed };
   }
 
   @Post('recently-viewed')
   async addRecentlyViewed(
     @Param('userId') userId: string,
+    @AuthEmail() email: string,
     @Body() body: ProductIdDto,
   ) {
     if (!body.productId) {
@@ -118,6 +146,7 @@ export class UsersController {
     }
     const recentlyViewed = await this.usersService.addRecentlyViewed(
       userId,
+      email,
       body.productId,
     );
     return { recentlyViewed };

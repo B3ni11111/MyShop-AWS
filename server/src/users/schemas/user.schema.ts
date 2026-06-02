@@ -35,9 +35,13 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema({ collection: 'users', timestamps: true })
 export class User {
-  /** Cognito `sub` — the canonical user id used in every `/users/:userId` route. */
+  /** Cognito `sub` — the canonical user id (matches the `:userId` route param). */
   @Prop({ required: true, unique: true, index: true })
-  userId: string;
+  cognitoSub: string;
+
+  /** Required by the collection's JSON-schema validator; taken from the ID token. */
+  @Prop({ required: true })
+  email: string;
 
   @Prop({ type: [CartItemSchema], default: [] })
   cart: CartItem[];

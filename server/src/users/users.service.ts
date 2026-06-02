@@ -13,8 +13,11 @@ const RECENTLY_VIEWED_LIMIT = 20;
 
 /**
  * Backs the cart / favorites / recently-viewed routes in UsersController.
- * Every user document is keyed by the Cognito `sub` (`userId`) and is created
- * lazily the first time we touch it, so callers never have to "register" first.
+ * Documents are keyed by the Cognito `sub` (`cognitoSub`) and created lazily on
+ * first access. `email` is set on insert because the collection's JSON-schema
+ * validator requires both `cognitoSub` and `email`. `cognitoSub` itself is
+ * populated from the query filter on upsert (putting it in $setOnInsert too
+ * would conflict).
  */
 @Injectable()
 export class UsersService {
@@ -22,124 +25,139 @@ export class UsersService {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
-  /** Fetch the user doc, creating an empty one on first access. */
-  private async getOrCreate(userId: string): Promise<UserDocument> {
-    return this.userModel
+  /** Fetch the user doc, creating an empty one (with email) on first access. */
+  private async getOrCreate(
+    cognitoSub: string,
+    email: string,
+  ): Promise<UserDocument> {
+    const user = await this.userModel
       .findOneAndUpdate(
-        { userId },
-        { $setOnInsert: { userId } },
-        { new: true, upsert: true },
+        { cognitoSub },
+        { $setOnInsert: { email } },
+        { returnDocument: 'after', upsert: true },
       )
       .exec();
+    return user!;
   }
 
   // ==================== CART ====================
 
-  async getCart(userId: string): Promise<CartItem[]> {
-    const user = await this.getOrCreate(userId);
+  async getCart(cognitoSub: string, email: string): Promise<CartItem[]> {
+    const user = await this.getOrCreate(cognitoSub, email);
     return user.cart;
   }
 
   /**
-   * Upsert a cart line. `qty` is treated as the absolute quantity: if the
-   * product is already in the cart we overwrite its qty/price, otherwise we
-   * append a new line.
+   * Upsert a cart line. `qty` is the absolute quantity: overwrite it if the
+   * product is already in the cart, otherwise append a new line.
    */
   async addToCart(
-    userId: string,
+    cognitoSub: string,
+    email: string,
     productId: string,
     qty: number,
     price: number,
   ): Promise<CartItem[]> {
-    // Try to update an existing line first.
     const existing = await this.userModel
       .findOneAndUpdate(
-        { userId, 'cart.productId': productId },
+        { cognitoSub, 'cart.productId': productId },
         { $set: { 'cart.$.qty': qty, 'cart.$.price': price } },
-        { new: true },
+        { returnDocument: 'after' },
       )
       .exec();
     if (existing) {
       return existing.cart;
     }
 
-    // No existing line (or no user yet) — push a new one, creating the user
-    // doc if needed.
     const user = await this.userModel
       .findOneAndUpdate(
-        { userId },
-        { $push: { cart: { productId, qty, price } }, $setOnInsert: { userId } },
-        { new: true, upsert: true },
+        { cognitoSub },
+        { $push: { cart: { productId, qty, price } }, $setOnInsert: { email } },
+        { returnDocument: 'after', upsert: true },
       )
       .exec();
-    return user.cart;
+    return user!.cart;
   }
 
-  async removeFromCart(userId: string, productId: string): Promise<CartItem[]> {
+  async removeFromCart(
+    cognitoSub: string,
+    email: string,
+    productId: string,
+  ): Promise<CartItem[]> {
     const user = await this.userModel
       .findOneAndUpdate(
-        { userId },
-        { $pull: { cart: { productId } }, $setOnInsert: { userId } },
-        { new: true, upsert: true },
+        { cognitoSub },
+        { $pull: { cart: { productId } }, $setOnInsert: { email } },
+        { returnDocument: 'after', upsert: true },
       )
       .exec();
-    return user.cart;
+    return user!.cart;
   }
 
   // ==================== FAVORITES ====================
 
-  async getFavorites(userId: string): Promise<string[]> {
-    const user = await this.getOrCreate(userId);
+  async getFavorites(cognitoSub: string, email: string): Promise<string[]> {
+    const user = await this.getOrCreate(cognitoSub, email);
     return user.favorites;
   }
 
-  async addFavorite(userId: string, productId: string): Promise<string[]> {
-    // $addToSet keeps the list duplicate-free.
+  async addFavorite(
+    cognitoSub: string,
+    email: string,
+    productId: string,
+  ): Promise<string[]> {
     const user = await this.userModel
       .findOneAndUpdate(
-        { userId },
-        { $addToSet: { favorites: productId }, $setOnInsert: { userId } },
-        { new: true, upsert: true },
+        { cognitoSub },
+        { $addToSet: { favorites: productId }, $setOnInsert: { email } },
+        { returnDocument: 'after', upsert: true },
       )
       .exec();
-    return user.favorites;
+    return user!.favorites;
   }
 
-  async removeFavorite(userId: string, productId: string): Promise<string[]> {
+  async removeFavorite(
+    cognitoSub: string,
+    email: string,
+    productId: string,
+  ): Promise<string[]> {
     const user = await this.userModel
       .findOneAndUpdate(
-        { userId },
-        { $pull: { favorites: productId }, $setOnInsert: { userId } },
-        { new: true, upsert: true },
+        { cognitoSub },
+        { $pull: { favorites: productId }, $setOnInsert: { email } },
+        { returnDocument: 'after', upsert: true },
       )
       .exec();
-    return user.favorites;
+    return user!.favorites;
   }
 
   // ==================== RECENTLY VIEWED ====================
 
-  async getRecentlyViewed(userId: string): Promise<RecentlyViewedItem[]> {
-    const user = await this.getOrCreate(userId);
+  async getRecentlyViewed(
+    cognitoSub: string,
+    email: string,
+  ): Promise<RecentlyViewedItem[]> {
+    const user = await this.getOrCreate(cognitoSub, email);
     return user.recentlyViewed;
   }
 
   /**
-   * Record a product view: drop any prior entry for the same product, prepend
-   * a fresh one, and cap the list at RECENTLY_VIEWED_LIMIT (newest first).
-   * Done as two writes because Mongo can't $pull and $push the same array in
-   * one update.
+   * Record a product view: drop any prior entry for the same product, prepend a
+   * fresh one, and cap the list at RECENTLY_VIEWED_LIMIT (newest first). Two
+   * writes because Mongo can't $pull and $push the same array in one update.
    */
   async addRecentlyViewed(
-    userId: string,
+    cognitoSub: string,
+    email: string,
     productId: string,
   ): Promise<RecentlyViewedItem[]> {
     await this.userModel
-      .updateOne({ userId }, { $pull: { recentlyViewed: { productId } } })
+      .updateOne({ cognitoSub }, { $pull: { recentlyViewed: { productId } } })
       .exec();
 
     const user = await this.userModel
       .findOneAndUpdate(
-        { userId },
+        { cognitoSub },
         {
           $push: {
             recentlyViewed: {
@@ -148,11 +166,11 @@ export class UsersService {
               $slice: RECENTLY_VIEWED_LIMIT,
             },
           },
-          $setOnInsert: { userId },
+          $setOnInsert: { email },
         },
-        { new: true, upsert: true },
+        { returnDocument: 'after', upsert: true },
       )
       .exec();
-    return user.recentlyViewed;
+    return user!.recentlyViewed;
   }
 }
