@@ -4,7 +4,12 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: 'https://dsoobg7wgy1i3.cloudfront.net',
+    origin: [
+      'https://dsoobg7wgy1i3.cloudfront.net',
+      'https://main.dspu5eyduw64.amplifyapp.com',
+      'http://localhost:5173',
+      'http://localhost:3000',
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
