@@ -1,6 +1,11 @@
 import { fetchAuthSession } from 'aws-amplify/auth';
+import { API_BASE_URL } from '../config/api';
 
-const USERS_API_BASE = 'https://2vbl0rpwxd.execute-api.us-east-1.amazonaws.com/dev';
+// Users data now lives in the NestJS server (MongoDB), served by the same
+// Lambda + API Gateway as the items API. Routes are at `${base}/users/:userId/...`.
+// Defaults to the shared API base; override per environment via VITE_USERS_API_URL.
+const USERS_API_BASE =
+  import.meta.env.VITE_USERS_API_URL || API_BASE_URL;
 
 // Types
 export interface CartItem {
