@@ -236,7 +236,13 @@ export default function BetterItem({ i, compact = false }: BetterItemProps) {
               onClick={(e) => e.stopPropagation()}
               sx={{ mt: 2, display: "flex", gap: 2 }}
             >
-              <Button color="success" variant="contained">
+              <Button
+                component={Link}
+                to="/about"
+                state={{ fromCheckout: true }}
+                color="success"
+                variant="contained"
+              >
                 Buy Now!
               </Button>
               <Button

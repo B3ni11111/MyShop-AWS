@@ -7,6 +7,7 @@ import theme from "./config/theme";
 import { Outlet } from "react-router-dom";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
+import ScrollToTop from "./components/layout/ScrollToTop";
 import { AppContext } from "./context/AppContext";
 import type { AppContextType, oneItemInterface, CartItem, SortOption } from "./types";
 import { itemsData as staticItemsData } from "./data/itemsData";
@@ -258,6 +259,7 @@ function App() {
     <AppContext.Provider value={appData}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+        <ScrollToTop />
         <Box
           sx={{
             display: "flex",

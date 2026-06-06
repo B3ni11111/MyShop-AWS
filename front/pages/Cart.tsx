@@ -139,7 +139,7 @@ export default function Cart() {
           <Typography variant="h4">
             Total: ₪{getTotalPrice().toFixed(2)}
           </Typography>
-          <Link to={"/checkout"}>
+          <Link to={"/about"} state={{ fromCheckout: true }}>
             <Button color="success" variant="contained">
               checkout
             </Button>

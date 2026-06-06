@@ -237,6 +237,9 @@ export default function ItemPage() {
               }}
             >
               <Button
+                component={Link}
+                to="/about"
+                state={{ fromCheckout: true }}
                 variant="contained"
                 color="primary"
                 sx={{

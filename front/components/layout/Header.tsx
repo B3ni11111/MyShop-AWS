@@ -7,7 +7,6 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
 import Popover from "@mui/material/Popover";
@@ -15,6 +14,7 @@ import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import PersonIcon from "@mui/icons-material/Person";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import CloseIcon from "@mui/icons-material/Close";
@@ -311,49 +311,49 @@ export default function Header({ cartCount = 0 }: HeaderProps) {
           </Box>
 
           <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Account" />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {!isLoggedIn && (
-                <MenuItem
-                  onClick={() => {
-                    signInWithRedirect({ provider: "Google" });
-                    handleCloseUserMenu();
+            {!isLoggedIn ? (
+              <Button
+                variant="outlined"
+                onClick={() => signInWithRedirect({ provider: "Google" })}
+                sx={{
+                  color: "white",
+                  borderColor: "white",
+                  textTransform: "none",
+                }}
+              >
+                Log in
+              </Button>
+            ) : (
+              <>
+                <Tooltip title="Account">
+                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                    <PersonIcon sx={{ color: "white" }} />
+                  </IconButton>
+                </Tooltip>
+                <Menu
+                  sx={{ mt: "45px" }}
+                  id="menu-appbar"
+                  anchorEl={anchorElUser}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
                   }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(anchorElUser)}
+                  onClose={handleCloseUserMenu}
                 >
-                  <Typography
-                    sx={{
-                      textAlign: "center",
-                      pl: 2,
-                      textDecoration: "none",
-                      color: "black",
+                  <MenuItem
+                    onClick={async () => {
+                      await signOut({ global: false });
+                      clearUserData();
+                      setIsLoggedIn(false);
+                      handleCloseUserMenu();
                     }}
                   >
-                    Login with Google
-                  </Typography>
-                </MenuItem>
-              )}
-              {isLoggedIn && (
-                <Link to={"account/profile"}>
-                  <MenuItem onClick={handleCloseUserMenu}>
                     <Typography
                       sx={{
                         textAlign: "center",
@@ -362,81 +362,12 @@ export default function Header({ cartCount = 0 }: HeaderProps) {
                         color: "black",
                       }}
                     >
-                      Profile
+                      Sign Out
                     </Typography>
                   </MenuItem>
-                </Link>
-              )}
-              {isLoggedIn && (
-                <Link to={"account/orders"}>
-                  <MenuItem onClick={handleCloseUserMenu}>
-                    <Typography
-                      sx={{
-                        textAlign: "center",
-                        pl: 2,
-                        textDecoration: "none",
-                        color: "black",
-                      }}
-                    >
-                      Your Orders
-                    </Typography>
-                  </MenuItem>
-                </Link>
-              )}
-              {isLoggedIn && (
-                <Link to={"account/info"}>
-                  <MenuItem onClick={handleCloseUserMenu}>
-                    <Typography
-                      sx={{
-                        textAlign: "center",
-                        pl: 2,
-                        textDecoration: "none",
-                        color: "black",
-                      }}
-                    >
-                      Account Center
-                    </Typography>
-                  </MenuItem>
-                </Link>
-              )}
-              {isLoggedIn && (
-                <Link to={"account/settings"}>
-                  <MenuItem onClick={handleCloseUserMenu}>
-                    <Typography
-                      sx={{
-                        textAlign: "center",
-                        pl: 2,
-                        textDecoration: "none",
-                        color: "black",
-                      }}
-                    >
-                      Settings & preferences
-                    </Typography>
-                  </MenuItem>
-                </Link>
-              )}
-              {isLoggedIn && (
-                <MenuItem
-                  onClick={async () => {
-                    await signOut({ global: false });
-                    clearUserData();
-                    setIsLoggedIn(false);
-                    handleCloseUserMenu();
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      textAlign: "center",
-                      pl: 2,
-                      textDecoration: "none",
-                      color: "black",
-                    }}
-                  >
-                    Sign Out
-                  </Typography>
-                </MenuItem>
-              )}
-            </Menu>
+                </Menu>
+              </>
+            )}
           </Box>
         </Toolbar>
       </Container>
