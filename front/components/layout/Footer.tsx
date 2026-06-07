@@ -51,7 +51,7 @@ export default function Footer() {
               <Link to={"https://www.linkedin.com/in/bennybar1/"}>
                 <LinkedInIcon sx={{ color: "white" }} />
               </Link>
-              <Link to={"https://github.com/B3ni11111"}>
+              <Link to={"https://github.com/BennyBar1"}>
                 <GitHubIcon sx={{ color: "white" }} />
               </Link>
             </Box>
