@@ -7,9 +7,11 @@ import {
   Alert,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
+import { useAppContext } from "../hooks/useAppContext";
 
 export default function About() {
   const location = useLocation();
+  const { dbOnline } = useAppContext();
   const fromCheckout = (location.state as { fromCheckout?: boolean } | null)
     ?.fromCheckout;
 
@@ -27,6 +29,14 @@ export default function About() {
         <Alert severity="info" sx={{ mb: 3 }}>
           Heads up — MyShop isn't a real e-commerce store. It's a personal
           portfolio project, so no orders are processed and nothing is charged.
+        </Alert>
+      )}
+
+      {dbOnline === false && (
+        <Alert severity="warning" sx={{ mb: 3 }}>
+          The product database looks offline right now. It runs on a single
+          EC2 instance that isn't kept on 24/7 to save hosting costs, so
+          products, cart, and favourites may not load until it's back up.
         </Alert>
       )}
 
@@ -60,9 +70,16 @@ export default function About() {
       <Typography variant="h5" sx={{ mb: 1 }}>
         Tech Stack
       </Typography>
-      <Typography sx={{ lineHeight: 1.7 }}>
+      <Typography sx={{ mb: 2, lineHeight: 1.7 }}>
         React · TypeScript · Node.js · AWS Lambda · API Gateway · Amplify ·
         Cognito · DynamoDB · MongoDB · EC2
+      </Typography>
+
+      <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.7 }}>
+        Note: to keep hosting costs down, the MongoDB EC2 instance isn't
+        running around the clock — it's mainly kept on during active
+        development. If products, cart, or favourites aren't loading, that's
+        most likely why, not a bug in the app itself.
       </Typography>
     </Box>
   );

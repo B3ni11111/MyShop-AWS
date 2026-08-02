@@ -11,17 +11,24 @@ import type { itemsDataInterface } from "../types";
 import { API_ENDPOINTS } from "../config/api";
 
 export default function ShopItems() {
-  const { sort } = useAppContext();
+  const { sort, reportDbStatus } = useAppContext();
   const { mainCat, subCat } = useParams<{ mainCat: string; subCat: string }>();
   const [data, setData] = useState<itemsDataInterface[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(API_ENDPOINTS.itemsFull)
-      .then((res) => res.json())
-      .then((data) => setData(data))
+      .then((res) => {
+        if (!res.ok) throw new Error("Request failed");
+        return res.json();
+      })
+      .then((data) => {
+        setData(data);
+        reportDbStatus(true);
+      })
+      .catch(() => reportDbStatus(false))
       .finally(() => setLoading(false));
-  }, []);
+  }, [reportDbStatus]);
 
   const categoryEntry = data.find((entry) => entry.category.path === mainCat);
   const subCategory = categoryEntry?.category.subCategory.find(

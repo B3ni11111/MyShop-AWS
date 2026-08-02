@@ -37,9 +37,19 @@ function App() {
   const [sort, setSort] = useState<SortOption>("recommended");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [dbOnline, setDbOnline] = useState<boolean | null>(null);
+  const [showDbMessage, setShowDbMessage] = useState(false);
 
   const showAuthMessage = useCallback((message: string) => {
     setAuthMessage(message);
+  }, []);
+
+  const reportDbStatus = useCallback((online: boolean) => {
+    setDbOnline((prev) => {
+      if (prev === false && online === false) return prev;
+      if (online === false) setShowDbMessage(true);
+      return online;
+    });
   }, []);
 
   // Check auth status and load data from API
@@ -253,6 +263,8 @@ function App() {
     resetCart,
     showAuthMessage,
     clearUserData,
+    dbOnline,
+    reportDbStatus,
   };
 
   return (
@@ -288,6 +300,23 @@ function App() {
             sx={{ width: "100%" }}
           >
             {authMessage}
+          </Alert>
+        </Snackbar>
+        <Snackbar
+          open={showDbMessage}
+          autoHideDuration={8000}
+          onClose={() => setShowDbMessage(false)}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={() => setShowDbMessage(false)}
+            severity="info"
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            The product database is offline right now. This is a personal
+            portfolio project running on a single EC2 instance, which isn't
+            always kept on to save hosting costs — check back a bit later!
           </Alert>
         </Snackbar>
       </ThemeProvider>

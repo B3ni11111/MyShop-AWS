@@ -9,18 +9,27 @@ import type { itemsDataInterface } from "../types";
 import { API_ENDPOINTS } from "../config/api";
 import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
 import { Hub } from "aws-amplify/utils";
+import { useAppContext } from "../hooks/useAppContext";
 
 export default function Home() {
+  const { reportDbStatus } = useAppContext();
   const [data, setData] = useState<itemsDataInterface[]>([]);
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState<string>("");
 
   useEffect(() => {
     fetch(API_ENDPOINTS.itemsFull)
-      .then((res) => res.json())
-      .then((data) => setData(data))
+      .then((res) => {
+        if (!res.ok) throw new Error("Request failed");
+        return res.json();
+      })
+      .then((data) => {
+        setData(data);
+        reportDbStatus(true);
+      })
+      .catch(() => reportDbStatus(false))
       .finally(() => setLoading(false));
-  }, []);
+  }, [reportDbStatus]);
 
   const loadUser = async () => {
     try {

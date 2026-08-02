@@ -8,18 +8,27 @@ import CategoryCard from "../components/ui/CategoryCard";
 import NotFound from "./NotFound";
 import type { itemsDataInterface } from "../types";
 import { API_ENDPOINTS } from "../config/api";
+import { useAppContext } from "../hooks/useAppContext";
 
 export default function SubCategory() {
+  const { reportDbStatus } = useAppContext();
   const { mainCat } = useParams<{ mainCat: string }>();
   const [data, setData] = useState<itemsDataInterface[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(API_ENDPOINTS.itemsFull)
-      .then((res) => res.json())
-      .then((data) => setData(data))
+      .then((res) => {
+        if (!res.ok) throw new Error("Request failed");
+        return res.json();
+      })
+      .then((data) => {
+        setData(data);
+        reportDbStatus(true);
+      })
+      .catch(() => reportDbStatus(false))
       .finally(() => setLoading(false));
-  }, []);
+  }, [reportDbStatus]);
 
   if (loading) {
     return (

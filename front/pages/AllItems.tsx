@@ -9,16 +9,23 @@ import type { oneItemInterface } from "../types";
 import { API_ENDPOINTS } from "../config/api";
 
 export default function AllItems() {
-  const { sort } = useAppContext();
+  const { sort, reportDbStatus } = useAppContext();
   const [items, setItems] = useState<oneItemInterface[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(API_ENDPOINTS.items)
-      .then((res) => res.json())
-      .then((data) => setItems(data))
+      .then((res) => {
+        if (!res.ok) throw new Error("Request failed");
+        return res.json();
+      })
+      .then((data) => {
+        setItems(data);
+        reportDbStatus(true);
+      })
+      .catch(() => reportDbStatus(false))
       .finally(() => setLoading(false));
-  }, []);
+  }, [reportDbStatus]);
 
   const sortedItems = useMemo(() => {
     if (sort === "lowToHigh") {

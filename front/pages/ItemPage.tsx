@@ -27,7 +27,7 @@ interface ItemWithContext extends oneItemInterface {
 }
 
 export default function ItemPage() {
-  const { addToCart, toggleFav, fav, isAuthenticated } = useAppContext();
+  const { addToCart, toggleFav, fav, isAuthenticated, reportDbStatus } = useAppContext();
   const { id } = useParams<{ id: string }>();
 
   const [item, setItem] = useState<ItemWithContext | null>(null);
@@ -48,10 +48,14 @@ export default function ItemPage() {
       .then((data) => {
         setItem(data);
         setError(null);
+        reportDbStatus(true);
       })
-      .catch(() => setError("Failed to fetch from server"))
+      .catch(() => {
+        setError("Failed to fetch from server");
+        reportDbStatus(false);
+      })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, reportDbStatus]);
 
   // Track recently viewed (only if authenticated)
   useEffect(() => {

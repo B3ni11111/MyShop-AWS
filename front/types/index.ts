@@ -56,4 +56,6 @@ export interface AppContextType {
   updateQuantity: (id: number | string, newQ: number) => void;
   showAuthMessage: (message: string) => void;
   clearUserData: () => void;
+  dbOnline: boolean | null;
+  reportDbStatus: (online: boolean) => void;
 }
