@@ -1,28 +1,10 @@
-import { Box, Card, Typography, IconButton, Button } from "@mui/material";
+import { Box, Card, Typography, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import { useAppContext } from "../hooks/useAppContext";
-import { signInWithRedirect } from "aws-amplify/auth";
 
 export default function Fav() {
-    const { fav, toggleFav, addToCart, isAuthenticated } = useAppContext();
-
-    if (!isAuthenticated) {
-        return (
-            <Box sx={{ bgcolor: "background.paper", p: 4, borderRadius: 2, textAlign: "center" }}>
-                <Typography variant="h4" sx={{ mb: 2 }}>Sign in to view your favorites</Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                    Please sign in to save and view your favorite items.
-                </Typography>
-                <Button
-                    variant="contained"
-                    onClick={() => signInWithRedirect({ provider: "Google" })}
-                >
-                    Sign in with Google
-                </Button>
-            </Box>
-        );
-    }
+    const { fav, toggleFav, addToCart } = useAppContext();
 
     if (fav.length === 0) {
         return (

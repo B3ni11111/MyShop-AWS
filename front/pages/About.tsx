@@ -4,7 +4,7 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import CloudIcon from "@mui/icons-material/Cloud";
 import DnsIcon from "@mui/icons-material/Dns";
 import StorageIcon from "@mui/icons-material/Storage";
-import LockIcon from "@mui/icons-material/Lock";
+import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
 import { useAppContext } from "../hooks/useAppContext";
 import { SOCIAL_LINKS } from "../components/ui/SocialLinks";
 
@@ -12,7 +12,7 @@ const features = [
   "Browse products by main category and sub-category, or see everything at once",
   "Sort product lists and open a quick-view or a full product page",
   "Add items to the cart and keep a favourites list",
-  "Sign in with Google to keep your cart, favourites and recently viewed items",
+  "Your cart and favourites are saved in your browser, no account needed",
   "Fully responsive layout that works on phone, tablet and desktop",
 ];
 
@@ -27,19 +27,19 @@ const architecture = [
     Icon: DnsIcon,
     title: "Backend API",
     host: "Render",
-    text: "A NestJS REST API that serves the product catalogue and per-user data. It runs on Render's free tier, so the first request after a quiet period may take ~30 seconds to wake up.",
+    text: "A NestJS REST API that serves the product catalogue. It runs on Render's free tier, so the first request after a quiet period may take ~30 seconds to wake up.",
   },
   {
     Icon: StorageIcon,
     title: "Database",
     host: "Supabase",
-    text: "Products, categories and user data (cart, favourites, recently viewed) live in a managed cloud database.",
+    text: "Products, categories and sub-categories live in a managed cloud database that the API reads from.",
   },
   {
-    Icon: LockIcon,
-    title: "Authentication",
-    host: "AWS Cognito",
-    text: "Sign-in with Google OAuth via AWS Amplify. The API verifies each user's JWT before touching their data.",
+    Icon: ShoppingBagIcon,
+    title: "Cart & favourites",
+    host: "Your browser",
+    text: "No sign-up or login. Your cart and favourites are kept in your browser's local storage, so they stay put between visits on the same device.",
   },
 ];
 
@@ -52,8 +52,6 @@ const stack = [
   "NestJS",
   "Node.js",
   "Supabase",
-  "AWS Cognito",
-  "AWS Amplify",
   "Vercel",
   "Render",
 ];
@@ -105,7 +103,7 @@ export default function About() {
       <Typography sx={{ mb: 2, lineHeight: 1.8, fontSize: "1.1rem" }}>
         MyShop is a full-stack e-commerce web app I built as a portfolio
         project. It covers the whole path of a real online store — a product
-        catalogue, cart, favourites and Google sign-in — from the UI down to
+        catalogue, a cart and favourites — from the UI down to
         the API, the database and the cloud hosting behind it.
       </Typography>
       <Typography sx={{ mb: 4, lineHeight: 1.8, color: "text.secondary" }}>

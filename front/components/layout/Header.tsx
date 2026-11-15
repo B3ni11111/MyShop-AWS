@@ -1,4 +1,4 @@
-import { useState, useEffect, MouseEvent } from "react";
+import { useState, MouseEvent } from "react";
 import AppBar from "@mui/material/AppBar";
 import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
@@ -8,18 +8,15 @@ import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import Container from "@mui/material/Container";
 import Tooltip from "@mui/material/Tooltip";
-import MenuItem from "@mui/material/MenuItem";
 import Popover from "@mui/material/Popover";
 import Button from "@mui/material/Button";
 import Divider from "@mui/material/Divider";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import PersonIcon from "@mui/icons-material/Person";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import CloseIcon from "@mui/icons-material/Close";
 import { Link } from "react-router-dom";
-import { signInWithRedirect, getCurrentUser, signOut } from "aws-amplify/auth";
 import { useAppContext } from "../../hooks/useAppContext";
 import logo from "../../assets/images/logo.jpg";
 
@@ -29,21 +26,9 @@ interface HeaderProps {
 
 export default function Header({ cartCount = 0 }: HeaderProps) {
   const [anchorElNav, setAnchorElNav] = useState<HTMLElement | null>(null);
-  const [anchorElUser, setAnchorElUser] = useState<HTMLElement | null>(null);
   const [anchorElCart, setAnchorElCart] = useState<HTMLElement | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-  const { cart, updateQuantity, removeFromCart, clearUserData } = useAppContext();
-
-  useEffect(() => {
-    getCurrentUser()
-      .then(() => setIsLoggedIn(true))
-      .catch(() => setIsLoggedIn(false));
-  }, []);
-
-  const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget);
-  };
+  const { cart, updateQuantity, removeFromCart } = useAppContext();
 
   const handleCartMouseEnter = (event: MouseEvent<HTMLElement>) => {
     setAnchorElCart(event.currentTarget);
@@ -57,9 +42,6 @@ export default function Header({ cartCount = 0 }: HeaderProps) {
     setAnchorElNav(null);
   };
 
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
 
   const cartTotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -308,66 +290,6 @@ export default function Header({ cartCount = 0 }: HeaderProps) {
                 </Box>
               </Popover>
             </Box>
-          </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
-            {!isLoggedIn ? (
-              <Button
-                variant="outlined"
-                onClick={() => signInWithRedirect({ provider: "Google" })}
-                sx={{
-                  color: "white",
-                  borderColor: "white",
-                  textTransform: "none",
-                }}
-              >
-                Log in
-              </Button>
-            ) : (
-              <>
-                <Tooltip title="Account">
-                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <PersonIcon sx={{ color: "white" }} />
-                  </IconButton>
-                </Tooltip>
-                <Menu
-                  sx={{ mt: "45px" }}
-                  id="menu-appbar"
-                  anchorEl={anchorElUser}
-                  anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  open={Boolean(anchorElUser)}
-                  onClose={handleCloseUserMenu}
-                >
-                  <MenuItem
-                    onClick={async () => {
-                      await signOut({ global: false });
-                      clearUserData();
-                      setIsLoggedIn(false);
-                      handleCloseUserMenu();
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        textAlign: "center",
-                        pl: 2,
-                        textDecoration: "none",
-                        color: "black",
-                      }}
-                    >
-                      Sign Out
-                    </Typography>
-                  </MenuItem>
-                </Menu>
-              </>
-            )}
           </Box>
         </Toolbar>
       </Container>

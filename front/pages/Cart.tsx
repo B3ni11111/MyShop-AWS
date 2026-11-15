@@ -6,31 +6,13 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { useAppContext } from "../hooks/useAppContext";
 import LaunchIcon from "@mui/icons-material/Launch";
 import { Link } from "react-router-dom";
-import { signInWithRedirect } from "aws-amplify/auth";
 
 export default function Cart() {
-  const { cart, removeFromCart, updateQuantity, resetCart, isAuthenticated } = useAppContext();
+  const { cart, removeFromCart, updateQuantity, resetCart } = useAppContext();
 
   const getTotalPrice = () => {
     return cart.reduce((total, i) => total + i.price * i.quantity, 0);
   };
-
-  if (!isAuthenticated) {
-    return (
-      <Box sx={{ bgcolor: "background.paper", p: 4, borderRadius: 2, textAlign: "center" }}>
-        <Typography variant="h4" sx={{ mb: 2 }}>Sign in to view your cart</Typography>
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Please sign in to add items to your cart and complete your purchase.
-        </Typography>
-        <Button
-          variant="contained"
-          onClick={() => signInWithRedirect({ provider: "Google" })}
-        >
-          Sign in with Google
-        </Button>
-      </Box>
-    );
-  }
 
   if (cart.length === 0) {
     return (

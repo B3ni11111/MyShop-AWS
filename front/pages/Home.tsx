@@ -7,15 +7,12 @@ import { Typography, Button, CircularProgress } from "@mui/material";
 import BetterItem from "../components/ui/BetterItem";
 import type { itemsDataInterface } from "../types";
 import { API_ENDPOINTS } from "../config/api";
-import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
-import { Hub } from "aws-amplify/utils";
 import { useAppContext } from "../hooks/useAppContext";
 
 export default function Home() {
   const { reportDbStatus } = useAppContext();
   const [data, setData] = useState<itemsDataInterface[]>([]);
   const [loading, setLoading] = useState(true);
-  const [username, setUsername] = useState<string>("");
 
   useEffect(() => {
     fetch(API_ENDPOINTS.itemsFull)
@@ -30,29 +27,6 @@ export default function Home() {
       .catch(() => reportDbStatus(false))
       .finally(() => setLoading(false));
   }, [reportDbStatus]);
-
-  const loadUser = async () => {
-    try {
-      await getCurrentUser();
-      const session = await fetchAuthSession();
-      const payload = session.tokens?.idToken?.payload;
-      const name = payload?.name ?? payload?.email ?? "";
-      setUsername(name as string);
-    } catch {
-      setUsername("");
-    }
-  };
-
-  useEffect(() => {
-    loadUser();
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = Hub.listen("auth", () => {
-      loadUser();
-    });
-    return unsubscribe;
-  }, []);
 
   const allItems = data.flatMap((entry) =>
     entry.category.subCategory.flatMap((sub) => sub.items),
@@ -84,7 +58,7 @@ export default function Home() {
       }}
     >
       <Typography variant="h4" sx={{ mb: 3 }}>
-        {username ? `Welcome, ${username}!` : "Welcome"}
+        Welcome
       </Typography>
 
       <Typography variant="h5" sx={{ mb: 2 }}>

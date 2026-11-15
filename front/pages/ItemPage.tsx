@@ -4,10 +4,9 @@ import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import type { oneItemInterface } from "../types";
 import { useParams, Link } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useAppContext } from "../hooks/useAppContext";
 import { API_ENDPOINTS } from "../config/api";
-import { addToRecentlyViewed } from "../services/usersApi";
 import {
   Container,
   Box,
@@ -27,14 +26,12 @@ interface ItemWithContext extends oneItemInterface {
 }
 
 export default function ItemPage() {
-  const { addToCart, toggleFav, fav, isAuthenticated, reportDbStatus } = useAppContext();
+  const { addToCart, toggleFav, fav, reportDbStatus } = useAppContext();
   const { id } = useParams<{ id: string }>();
 
   const [item, setItem] = useState<ItemWithContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const hasTrackedView = useRef(false);
 
   useEffect(() => {
     if (!id) return;
@@ -56,22 +53,6 @@ export default function ItemPage() {
       })
       .finally(() => setLoading(false));
   }, [id, reportDbStatus]);
-
-  // Track recently viewed (only if authenticated)
-  useEffect(() => {
-    if (!id || !isAuthenticated || hasTrackedView.current) return;
-
-    const trackView = async () => {
-      try {
-        await addToRecentlyViewed(id);
-        hasTrackedView.current = true;
-      } catch (err) {
-        console.error("Failed to track recently viewed:", err);
-      }
-    };
-
-    trackView();
-  }, [id, isAuthenticated]);
 
   if (loading) {
     return (
