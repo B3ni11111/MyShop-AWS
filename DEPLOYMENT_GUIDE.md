@@ -1,6 +1,11 @@
 # MyShop Free Deployment Guide
 
-This guide walks through deploying MyShop to free-tier hosting: Vercel (frontend), Render (backend), and MongoDB Atlas (database).
+## Current Status:
+- ✅ **Frontend (Vercel)**: Already deployed - https://vercel.com/b3ni11111s-projects/myshop-react-benny
+- ⏳ **Backend (Render)**: Ready to deploy
+- ⏳ **Database (MongoDB Atlas)**: Ready to set up
+
+This guide covers deploying the remaining services: Render (backend) and MongoDB Atlas (database).
 
 ## Prerequisites
 

@@ -1,5 +1,11 @@
 # Quick Deploy to Render + Vercel
 
+## ✅ DONE: Vercel Frontend
+- Live at: https://vercel.com/b3ni11111s-projects/myshop-react-benny
+- Frontend deployment complete
+
+## REMAINING: Backend + Database
+
 ## Step 1: Create MongoDB Atlas (FREE - 512MB)
 Go to: https://www.mongodb.com/cloud/atlas/register
 
