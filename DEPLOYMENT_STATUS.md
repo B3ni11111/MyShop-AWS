@@ -5,11 +5,11 @@
 1. **Frontend - Vercel**
    - ✅ Deployed and live
    - URL: https://vercel.com/b3ni11111s-projects/myshop-react-benny
-   - Configured to use backend: https://myshop-server.onrender.com
+   - Configured to use backend: https://myshop-server-0mz8.onrender.com
 
 2. **Backend - Render**
    - ✅ Deployed and running
-   - URL: https://myshop-server.onrender.com
+   - URL: https://myshop-server-0mz8.onrender.com
    - Status: HTTP 200 on root endpoint
    - **Blocked**: Waiting for MongoDB Atlas connection string
 
@@ -36,7 +36,7 @@
 ## 🧪 Testing Plan
 
 Once MongoDB is set up:
-1. Test API: `https://myshop-server.onrender.com/api/items`
+1. Test API: `https://myshop-server-0mz8.onrender.com/api/items`
 2. Test frontend: `https://myshop-react-benny.vercel.app`
 3. Try loading products
 4. Test adding to cart

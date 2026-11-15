@@ -57,7 +57,7 @@ This guide covers deploying the remaining services: Render (backend) and MongoDB
      ```
 7. Click "Create Web Service"
 8. Wait for deployment (~5-10 min)
-9. Copy your service URL (e.g., `https://myshop-server.onrender.com`)
+9. Copy your service URL (e.g., `https://myshop-server-0mz8.onrender.com`)
 
 ## Step 3: Deploy Frontend to Vercel
 
@@ -70,7 +70,7 @@ This guide covers deploying the remaining services: Render (backend) and MongoDB
    - **Root Directory**: `./front`
    - **Framework Preset**: `Vite`
 6. Add environment variables:
-   - `VITE_API_URL=https://myshop-server.onrender.com`
+   - `VITE_API_URL=https://myshop-server-0mz8.onrender.com`
 7. Click "Deploy"
 8. Wait for deployment (~3-5 min)
 9. Your frontend will be at: `https://myshop-frontend.vercel.app`

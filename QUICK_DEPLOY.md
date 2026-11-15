@@ -38,7 +38,7 @@ mongodb+srv://myshop:PASSWORD@cluster.mongodb.net/myshop?retryWrites=true&w=majo
    PORT=3000
    ```
 6. Deploy → Wait 5-10 min
-7. **Copy Render URL** (e.g., https://myshop-server.onrender.com)
+7. **Copy Render URL** (e.g., https://myshop-server-0mz8.onrender.com)
 
 ## Step 3: Deploy Frontend to Vercel (FREE)
 1. Go to: https://vercel.com/dashboard
@@ -47,7 +47,7 @@ mongodb+srv://myshop:PASSWORD@cluster.mongodb.net/myshop?retryWrites=true&w=majo
 4. Root Directory: ./front
 5. Environment Variables:
    ```
-   VITE_API_URL=https://myshop-server.onrender.com
+   VITE_API_URL=https://myshop-server-0mz8.onrender.com
    ```
 6. Deploy → Wait 3-5 min
 7. **Copy Vercel URL** (e.g., https://myshop-frontend.vercel.app)

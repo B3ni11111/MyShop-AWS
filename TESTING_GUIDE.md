@@ -13,7 +13,7 @@ After deploying to Vercel, Render, and MongoDB Atlas, use this guide to verify e
 
 **Goal**: Verify backend is running and accessible
 
-1. Open your Render backend URL in browser: `https://myshop-server.onrender.com/`
+1. Open your Render backend URL in browser: `https://myshop-server-0mz8.onrender.com/`
 2. Expected: See "Hello World!" message or 404 (either is fine - means server is running)
 3. Check Render logs for any errors
 
