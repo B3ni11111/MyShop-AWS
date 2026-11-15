@@ -1,6 +1,10 @@
 import { createTheme } from "@mui/material";
 
 const theme = createTheme({
+  shape: {
+    // 8px base: 1 = 8px (images, inputs, buttons), 2 = 16px (cards, panels, modals)
+    borderRadius: 8,
+  },
   typography: {
     fontFamily: '"Open Sans", sans-serif',
   },

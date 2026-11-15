@@ -35,7 +35,7 @@ const modalStyle = {
   border: 1,
   borderColor: "secondary.main",
   boxShadow: 24,
-  borderRadius: "20px",
+  borderRadius: 2,
   p: { xs: 2, sm: 3, md: 4 },
   color: "text.primary",
   display: "flex",
@@ -59,7 +59,7 @@ export default function BetterItem({ i, compact = false }: BetterItemProps) {
     <>
       <Card
         sx={{
-          borderRadius: "5%",
+          borderRadius: 2,
           cursor: "pointer",
           width: "100%",
           maxWidth: compact

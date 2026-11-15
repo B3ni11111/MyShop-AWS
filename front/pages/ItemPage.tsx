@@ -143,7 +143,7 @@ export default function ItemPage() {
             <Box
               sx={{
                 aspectRatio: "1 / 1",
-                borderRadius: 3,
+                borderRadius: 2,
                 border: "1px solid",
                 borderColor: "divider",
                 bgcolor: "#fff",

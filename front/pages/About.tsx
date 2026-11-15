@@ -1,13 +1,70 @@
-import {
-  Box,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
-  Alert,
-} from "@mui/material";
+import { Alert, Box, Button, Chip, Paper, Typography } from "@mui/material";
 import { useLocation } from "react-router-dom";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import CloudIcon from "@mui/icons-material/Cloud";
+import DnsIcon from "@mui/icons-material/Dns";
+import StorageIcon from "@mui/icons-material/Storage";
+import LockIcon from "@mui/icons-material/Lock";
 import { useAppContext } from "../hooks/useAppContext";
+import { SOCIAL_LINKS } from "../components/ui/SocialLinks";
+
+const features = [
+  "Browse products by main category and sub-category, or see everything at once",
+  "Sort product lists and open a quick-view or a full product page",
+  "Add items to the cart and keep a favourites list",
+  "Sign in with Google to keep your cart, favourites and recently viewed items",
+  "Fully responsive layout that works on phone, tablet and desktop",
+];
+
+const architecture = [
+  {
+    Icon: StorefrontIcon,
+    title: "Frontend",
+    host: "Vercel",
+    text: "A React 19 + TypeScript single-page app built with Vite and Material UI. Vercel builds and serves it from its global edge network on every push.",
+  },
+  {
+    Icon: DnsIcon,
+    title: "Backend API",
+    host: "Render",
+    text: "A NestJS REST API that serves the product catalogue and per-user data. It runs on Render's free tier, so the first request after a quiet period may take ~30 seconds to wake up.",
+  },
+  {
+    Icon: StorageIcon,
+    title: "Database",
+    host: "Supabase",
+    text: "Products, categories and user data (cart, favourites, recently viewed) live in a managed cloud database.",
+  },
+  {
+    Icon: LockIcon,
+    title: "Authentication",
+    host: "AWS Cognito",
+    text: "Sign-in with Google OAuth via AWS Amplify. The API verifies each user's JWT before touching their data.",
+  },
+];
+
+const stack = [
+  "React 19",
+  "TypeScript",
+  "Vite",
+  "Material UI",
+  "React Router",
+  "NestJS",
+  "Node.js",
+  "Supabase",
+  "AWS Cognito",
+  "AWS Amplify",
+  "Vercel",
+  "Render",
+];
+
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <Typography variant="h5" sx={{ fontWeight: 600, mb: 2 }}>
+      {children}
+    </Typography>
+  );
+}
 
 export default function About() {
   const location = useLocation();
@@ -15,16 +72,8 @@ export default function About() {
   const fromCheckout = (location.state as { fromCheckout?: boolean } | null)
     ?.fromCheckout;
 
-  const builtItems = [
-    "A React + TypeScript frontend deployed and hosted via AWS Amplify",
-    "A serverless backend using AWS Lambda and API Gateway, written in Node.js",
-    "User authentication with AWS Cognito, including Google OAuth",
-    "User-specific data (cart, favourites, last viewed) stored in DynamoDB",
-    "A dedicated EC2 instance running MongoDB for product and application data",
-  ];
-
   return (
-    <Box sx={{ p: 4, maxWidth: 800, mx: "auto" }}>
+    <Box sx={{ px: { xs: 2, sm: 4 }, py: { xs: 4, md: 6 }, maxWidth: 900, mx: "auto" }}>
       {fromCheckout && (
         <Alert severity="info" sx={{ mb: 3 }}>
           Heads up — MyShop isn't a real e-commerce store. It's a personal
@@ -34,53 +83,142 @@ export default function About() {
 
       {dbOnline === false && (
         <Alert severity="warning" sx={{ mb: 3 }}>
-          The product database looks offline right now. It runs on a single
-          EC2 instance that isn't kept on 24/7 to save hosting costs, so
-          products, cart, and favourites may not load until it's back up.
+          The product API isn't responding right now. It runs on a free hosting
+          tier that sleeps when idle, so give it a few seconds and refresh.
         </Alert>
       )}
 
-      <Typography variant="h2" sx={{ mb: 3 }}>
-        About Us
+      {/* Intro */}
+      <Typography
+        variant="overline"
+        sx={{ color: "secondary.main", fontWeight: 600, letterSpacing: 2 }}
+      >
+        About this project
+      </Typography>
+      <Typography
+        variant="h3"
+        component="h1"
+        sx={{ fontWeight: 700, mb: 2, fontSize: { xs: "2rem", md: "2.75rem" } }}
+      >
+        MyShop
+      </Typography>
+      <Typography sx={{ mb: 2, lineHeight: 1.8, fontSize: "1.1rem" }}>
+        MyShop is a full-stack e-commerce web app I built as a portfolio
+        project. It covers the whole path of a real online store — a product
+        catalogue, cart, favourites and Google sign-in — from the UI down to
+        the API, the database and the cloud hosting behind it.
+      </Typography>
+      <Typography sx={{ mb: 4, lineHeight: 1.8, color: "text.secondary" }}>
+        It's not a real store: nothing is sold and no payments are taken. It's
+        here to show how I design, build and deploy a production-style
+        application end to end.
       </Typography>
 
-      <Typography sx={{ mb: 2, lineHeight: 1.7 }}>
-        MyShop is a full-stack e-commerce web application built as a personal
-        learning project to gain hands-on experience with modern cloud
-        infrastructure and real-world development workflows.
-      </Typography>
-
-      <Typography sx={{ mb: 4, lineHeight: 1.7 }}>
-        The app allows users to browse products, manage a cart and favourites,
-        and authenticate securely — all served through a scalable, serverless
-        AWS architecture.
-      </Typography>
-
-      <Typography variant="h5" sx={{ mb: 1 }}>
-        What I built
-      </Typography>
-      <List sx={{ listStyleType: "disc", pl: 4, mb: 4 }}>
-        {builtItems.map((item) => (
-          <ListItem key={item} sx={{ display: "list-item", py: 0.25, pl: 0 }}>
-            <ListItemText primary={item} />
-          </ListItem>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, mb: 6 }}>
+        {SOCIAL_LINKS.map(({ label, href, Icon }) => (
+          <Button
+            key={label}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant={label === "Portfolio" ? "contained" : "outlined"}
+            startIcon={<Icon />}
+            sx={{ textTransform: "none", fontWeight: 600 }}
+          >
+            {label}
+          </Button>
         ))}
-      </List>
+      </Box>
 
-      <Typography variant="h5" sx={{ mb: 1 }}>
-        Tech Stack
-      </Typography>
-      <Typography sx={{ mb: 2, lineHeight: 1.7 }}>
-        React · TypeScript · Node.js · AWS Lambda · API Gateway · Amplify ·
-        Cognito · DynamoDB · MongoDB · EC2
-      </Typography>
+      {/* Features */}
+      <Box sx={{ mb: 6 }}>
+        <SectionTitle>What you can do</SectionTitle>
+        <Box component="ul" sx={{ pl: 3, m: 0 }}>
+          {features.map((f) => (
+            <Typography component="li" key={f} sx={{ mb: 1, lineHeight: 1.7 }}>
+              {f}
+            </Typography>
+          ))}
+        </Box>
+      </Box>
 
-      <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.7 }}>
-        Note: to keep hosting costs down, the MongoDB EC2 instance isn't
-        running around the clock — it's mainly kept on during active
-        development. If products, cart, or favourites aren't loading, that's
-        most likely why, not a bug in the app itself.
-      </Typography>
+      {/* Architecture */}
+      <Box sx={{ mb: 6 }}>
+        <SectionTitle>How it's built</SectionTitle>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+            gap: 2,
+          }}
+        >
+          {architecture.map(({ Icon, title, host, text }) => (
+            <Paper
+              key={title}
+              variant="outlined"
+              sx={{ p: 3, borderRadius: 2, height: "100%" }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, mb: 1.5 }}>
+                <Box
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 1,
+                    bgcolor: "primary.main",
+                    color: "primary.contrastText",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon fontSize="small" />
+                </Box>
+                <Box>
+                  <Typography sx={{ fontWeight: 600, lineHeight: 1.2 }}>
+                    {title}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    {host}
+                  </Typography>
+                </Box>
+              </Box>
+              <Typography variant="body2" sx={{ lineHeight: 1.7 }}>
+                {text}
+              </Typography>
+            </Paper>
+          ))}
+        </Box>
+      </Box>
+
+      {/* Stack */}
+      <Box sx={{ mb: 6 }}>
+        <SectionTitle>Tech stack</SectionTitle>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          {stack.map((s) => (
+            <Chip key={s} label={s} variant="outlined" sx={{ borderRadius: 1 }} />
+          ))}
+        </Box>
+      </Box>
+
+      {/* Note */}
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 3,
+          borderRadius: 2,
+          display: "flex",
+          gap: 2,
+          alignItems: "flex-start",
+          bgcolor: "background.default",
+        }}
+      >
+        <CloudIcon sx={{ color: "secondary.main", mt: 0.25 }} />
+        <Typography variant="body2" sx={{ color: "text.secondary", lineHeight: 1.7 }}>
+          Everything runs on free hosting tiers. If products take a moment to
+          appear, the API is just waking up — refresh after a few seconds.
+        </Typography>
+      </Paper>
     </Box>
   );
 }

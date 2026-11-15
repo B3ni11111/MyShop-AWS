@@ -314,9 +314,9 @@ function App() {
             variant="filled"
             sx={{ width: "100%" }}
           >
-            The product database is offline right now. This is a personal
-            portfolio project running on a single EC2 instance, which isn't
-            always kept on to save hosting costs — check back a bit later!
+            The product API isn't responding right now. This portfolio project
+            runs on free hosting that sleeps when idle — give it a few seconds
+            and refresh.
           </Alert>
         </Snackbar>
       </ThemeProvider>

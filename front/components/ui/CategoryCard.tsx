@@ -21,7 +21,7 @@ export default function CategoryCard({
     <Link to={link} style={{ textDecoration: "none" }}>
       <Card
         sx={{
-          borderRadius: "5%",
+          borderRadius: 2,
           cursor: "pointer",
           width: "100%",
           maxWidth: compact

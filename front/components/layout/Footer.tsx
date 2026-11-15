@@ -1,8 +1,5 @@
 import { Box, Typography, Container, Button } from "@mui/material";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import XIcon from "@mui/icons-material/X";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import GitHubIcon from "@mui/icons-material/GitHub";
+import SocialLinks from "../ui/SocialLinks";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import Stack from "@mui/material/Stack";
@@ -41,19 +38,8 @@ export default function Footer() {
               flex: { xs: 1, md: "0 0 55%" },
             }}
           >
-            <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
-              <Link to={"/about"}>
-                <InstagramIcon sx={{ color: "white" }} />
-              </Link>
-              <Link to={"/about"}>
-                <XIcon sx={{ color: "white" }} />
-              </Link>
-              <Link to={"https://www.linkedin.com/in/bennybar1/"}>
-                <LinkedInIcon sx={{ color: "white" }} />
-              </Link>
-              <Link to={"https://github.com/B3ni11111"}>
-                <GitHubIcon sx={{ color: "white" }} />
-              </Link>
+            <Box sx={{ mb: 2, ml: -1 }}>
+              <SocialLinks color="white" />
             </Box>
             <Link to={"/"} style={{ textDecoration: "none" }}>
               <Typography sx={{ color: "white" }}>
@@ -61,7 +47,7 @@ export default function Footer() {
               </Typography>
             </Link>
             <Link to={"/about"} style={{ textDecoration: "none" }}>
-              <Typography sx={{ color: "white" }}>about</Typography>
+              <Typography sx={{ color: "white" }}>About</Typography>
             </Link>
             <Link to={"/cart"} style={{ textDecoration: "none" }}>
               <Typography sx={{ color: "white" }}>Cart</Typography>
@@ -89,8 +75,13 @@ export default function Footer() {
               </Typography>
               <TextField
                 sx={{
-                  backgroundColor: "white",
+                  "& .MuiFilledInput-root": {
+                    bgcolor: "white",
+                    borderRadius: 1,
+                    "&:hover, &.Mui-focused": { bgcolor: "white" },
+                  },
                 }}
+                slotProps={{ input: { disableUnderline: true } }}
                 placeholder="Enter Your Email"
                 hiddenLabel
                 id="filled-hidden-label-small"
@@ -102,8 +93,13 @@ export default function Footer() {
               />
               <TextField
                 sx={{
-                  backgroundColor: "white",
+                  "& .MuiFilledInput-root": {
+                    bgcolor: "white",
+                    borderRadius: 1,
+                    "&:hover, &.Mui-focused": { bgcolor: "white" },
+                  },
                 }}
+                slotProps={{ input: { disableUnderline: true } }}
                 hiddenLabel
                 id="filled-hidden-label-small"
                 defaultValue="05"
