@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: myshop-server
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: MONGODB_URI
+        fromDatabase:
+          name: myshop-db
+          property: connectionString
+      - key: ALLOWED_ORIGINS
+        value: https://myshop-frontend.vercel.app,https://localhost:5173
+databases:
+  - name: myshop-db
+    plan: free
+    ipAllowList: []
